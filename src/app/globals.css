@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand colours, taken from the ENERDI logo */
+  --color-navy-950: #000b2e;
+  --color-navy-900: #001446;
+  --color-navy-800: #00205b;
+  --color-navy-700: #0b2f7a;
+  --color-sky-brand: #00aeef;
+  --color-sky-soft: #8fdcf9;
+  --color-paper: #f4f8fb;
+  --color-line: #d7e1ec;
+  --color-ink: #0a1a3f;
+  --color-muted: #4b5b78;
+
+  --font-display: "Archivo Variable", "Arial Narrow", Arial, sans-serif;
+  --font-sans: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+
+  --animate-bar-in: bar-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes bar-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-sky-brand);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
