@@ -33,7 +33,7 @@ export function Logo({ tone = "dark", className = "" }: LogoProps) {
         }`}
       />
       <span
-        className={`font-display text-[1.65rem] leading-none font-extrabold tracking-[0.04em] [font-stretch:112%] ${base}`}
+        className={`font-logo text-[1.65rem] leading-none font-extrabold tracking-[0.04em] [font-stretch:112%] ${base}`}
       >
         E<span className="text-sky-brand">N</span>ER
         <span className="text-sky-brand">D</span>I

@@ -1,23 +1,35 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand colours, taken from the ENERDI logo */
-  --color-navy-950: #000b2e;
-  --color-navy-900: #001446;
-  --color-navy-800: #00205b;
-  --color-navy-700: #0b2f7a;
-  --color-sky-brand: #00aeef;
-  --color-sky-soft: #8fdcf9;
-  --color-paper: #f4f8fb;
-  --color-line: #d7e1ec;
-  --color-ink: #0a1a3f;
-  --color-muted: #4b5b78;
+  /* Brand colours: deep energy blue, ocean blue, energy cyan and a light surface */
+  --color-navy-950: #020c2b;
+  --color-navy-900: #031645;
+  --color-navy-800: #041e5c;
+  --color-navy-700: #0c2d8c;
+  --color-sky-brand: #12b8ff;
+  --color-sky-soft: #9be1ff;
+  --color-paper: #f7f9fc;
+  --color-line: #dde5f0;
+  --color-ink: #0b1b40;
+  --color-muted: #4a5a78;
 
-  --font-display: "Archivo Variable", "Arial Narrow", Arial, sans-serif;
-  --font-sans: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --font-display: "Manrope Variable", "Segoe UI", Arial, sans-serif;
+  --font-sans: "Inter Variable", "Segoe UI", Arial, sans-serif;
+  /* The ENERDI wordmark keeps its own typeface. */
+  --font-logo: "Archivo Variable", "Arial Narrow", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
 
   --animate-bar-in: bar-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-slide-progress: slide-progress 6s linear both;
+}
+
+@keyframes slide-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes bar-in {
@@ -43,7 +55,7 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-stretch: 112%;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
@@ -54,6 +66,132 @@ p {
 :focus-visible {
   outline: 3px solid var(--color-sky-brand);
   outline-offset: 3px;
+}
+
+/*
+ * Motion. Sections fade up as they scroll into view, in browsers that can tie
+ * an animation to scrolling; everywhere else they are simply visible.
+ */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+/* The slow glow behind the home page hero. */
+@keyframes glow-drift {
+  0%,
+  100% {
+    transform: translate3d(-5%, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(5%, 4%, 0) scale(1.1);
+  }
+}
+
+.hero-glow {
+  animation: glow-drift 16s ease-in-out infinite;
+}
+
+/* The three small moving diagrams in the hero panel. */
+@keyframes viz-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes viz-bar {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes viz-draw {
+  0% {
+    stroke-dashoffset: 230;
+  }
+  60%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.viz-flow {
+  animation: viz-flow 1.2s linear infinite;
+}
+
+.viz-bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: viz-bar 2.4s ease-in-out infinite;
+}
+
+.viz-draw {
+  stroke-dasharray: 230;
+  animation: viz-draw 3.6s ease-in-out infinite;
+}
+
+/* The focus-area panel: its content eases in and its charts draw themselves. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes chart-draw {
+  from {
+    stroke-dashoffset: 700;
+  }
+}
+
+@keyframes node-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.panel-in {
+  animation: panel-in 0.35s ease-out both;
+}
+
+.grow-x {
+  transform-origin: left;
+  animation: grow-x 0.9s ease-out both;
+}
+
+.chart-draw {
+  stroke-dasharray: 700;
+  animation: chart-draw 1.6s ease-out both;
+}
+
+.node-pulse {
+  animation: node-pulse 1.8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -68,4 +206,118 @@ p {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Article and blog text, as written in the admin editor. */
+.prose-enerdi {
+  color: var(--color-ink);
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.prose-enerdi > * + * {
+  margin-top: 1.25em;
+}
+
+.prose-enerdi h2,
+.prose-enerdi h3,
+.prose-enerdi h4 {
+  color: var(--color-navy-800);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-top: 1.9em;
+}
+
+.prose-enerdi h2 {
+  font-size: 1.85rem;
+}
+
+.prose-enerdi h3 {
+  font-size: 1.45rem;
+}
+
+.prose-enerdi h4 {
+  font-size: 1.2rem;
+}
+
+.prose-enerdi > :first-child {
+  margin-top: 0;
+}
+
+.prose-enerdi a {
+  color: var(--color-navy-800);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-sky-brand);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.prose-enerdi ul,
+.prose-enerdi ol {
+  padding-left: 1.4em;
+}
+
+.prose-enerdi ul {
+  list-style: square;
+}
+
+.prose-enerdi ol {
+  list-style: decimal;
+}
+
+.prose-enerdi li + li {
+  margin-top: 0.4em;
+}
+
+.prose-enerdi li::marker {
+  color: var(--color-sky-brand);
+  font-weight: 600;
+}
+
+.prose-enerdi blockquote {
+  border-left: 6px solid var(--color-sky-brand);
+  background: var(--color-paper);
+  padding: 1em 1.4em;
+  font-size: 1.2rem;
+  color: var(--color-navy-800);
+}
+
+.prose-enerdi img {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose-enerdi figcaption {
+  margin-top: 0.6em;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.prose-enerdi code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-paper);
+  padding: 0.12em 0.35em;
+}
+
+.prose-enerdi pre {
+  overflow-x: auto;
+  background: var(--color-navy-950);
+  color: #ffffff;
+  padding: 1.1em 1.3em;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.prose-enerdi pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose-enerdi hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  margin: 2.2em 0;
 }

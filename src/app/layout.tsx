@@ -1,39 +1,38 @@
 import type { Metadata } from "next";
 import "@fontsource-variable/archivo/wdth.css";
-import "@fontsource/ibm-plex-sans/400.css";
-import "@fontsource/ibm-plex-sans/500.css";
-import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource-variable/manrope/index.css";
+import "@fontsource-variable/inter/index.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { site } from "@/content/site";
 
+/** The public address, used for the links that social networks preview. */
+function siteUrl() {
+  try {
+    return new URL(process.env.SITE_URL?.trim() || "http://localhost:3000");
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+}
+
 export const metadata: Metadata = {
+  metadataBase: siteUrl(),
   title: {
-    default: `${site.name} | ${site.tagline}`,
+    default: `${site.name} | ${site.meaning.join(", ")}`,
     template: `%s | ${site.name}`,
   },
   description: site.description,
 };
 
+/**
+ * The shell shared by everything. The public pages add the header and footer
+ * in `(site)/layout.tsx`; the admin panel has its own frame in `admin/`.
+ */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:bg-navy-800 focus:px-4 focus:py-2 focus:text-white"
-        >
-          Skip to content
-        </a>
-        <Header />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-      </body>
+    <html lang="en" className="h-full antialiased" data-scroll-behavior="smooth">
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

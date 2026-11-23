@@ -1,21 +1,26 @@
 import nodemailer from "nodemailer";
 import { site } from "@/content/site";
 import { adminEmail, visitorEmail, type Enquiry } from "./emails";
+import { dbConfigured } from "@/lib/db";
+import { markEnquiryEmailed, storeEnquiry } from "@/lib/enquiries";
 import { overLimit, recordUse, type Allowance } from "./rate-limit";
 
 /**
- * Receives the contact form, emails the enquiry to ENERDI and sends the
- * person who wrote in a confirmation.
+ * Receives the contact form. The enquiry is saved to the database, where the
+ * admin panel lists it, and emailed to ENERDI with a confirmation to the
+ * person who wrote in. Either one arriving counts as received: a mail problem
+ * never loses an enquiry that is safely stored, and the other way round.
  * Settings come from `.env.local` (see `.env.example`).
  */
 
 const DEFAULT_RECIPIENT = "mettadivya528@gmail.com";
 
-const limits = { name: 120, email: 200, company: 160, message: 5000 };
+const limits = { name: 120, email: 200, company: 160, phone: 40, message: 5000 };
 
 /** How many enquiries one visitor, or one recipient, may trigger per window. */
 const MAX_PER_VISITOR = 5;
 const MAX_PER_RECIPIENT = 3;
+const MAX_OVERALL = 120;
 
 /** The fields together cap out well below this, so anything larger is junk. */
 const MAX_BODY_BYTES = 32 * 1024;
@@ -92,6 +97,7 @@ export async function POST(request: Request) {
   const name = oneLine(clean(body.name, limits.name));
   const email = oneLine(clean(body.email, limits.email));
   const company = oneLine(clean(body.company, limits.company));
+  const phone = oneLine(clean(body.phone, limits.phone));
   const message = clean(body.message, limits.message);
 
   // The excluded characters are the ones that carry meaning in an address
@@ -112,6 +118,10 @@ export async function POST(request: Request) {
   const allowances: Allowance[] = [
     { key: visitorKey(request), limit: MAX_PER_VISITOR },
     { key: `recipient:${email.toLowerCase()}`, limit: MAX_PER_RECIPIENT },
+    // The two limits above can be dodged by faking the sender's address and
+    // varying the email. This one cannot: it caps the form as a whole, so a
+    // flood can neither fill the database nor use up the mail quota.
+    { key: "contact-form", limit: MAX_OVERALL },
   ];
 
   if (overLimit(allowances)) {
@@ -121,9 +131,22 @@ export async function POST(request: Request) {
     );
   }
 
+  recordUse(allowances);
+
+  let storedId: number | null = null;
+  if (dbConfigured()) {
+    try {
+      storedId = await storeEnquiry({ name, email, phone, company, message });
+    } catch (error) {
+      console.error("Contact form: the enquiry could not be saved to the database.", error);
+    }
+  }
+
   const user = setting("SMTP_USER");
   const password = setting("SMTP_PASSWORD");
   if (!user || !password) {
+    // Without email settings the admin panel is the inbox.
+    if (storedId !== null) return Response.json({ ok: true });
     console.error(
       "Contact form: SMTP_USER and SMTP_PASSWORD are not set in .env.local.",
     );
@@ -148,6 +171,7 @@ export async function POST(request: Request) {
     name,
     email,
     company,
+    phone,
     message,
     receivedAt: new Date(),
   };
@@ -158,8 +182,6 @@ export async function POST(request: Request) {
     setting("CONTACT_TIMEZONE") ?? "Asia/Kolkata",
   );
   const forVisitor = visitorEmail(enquiry, setting("SITE_URL") ?? null);
-
-  recordUse(allowances);
 
   // The enquiry itself has to arrive. The confirmation is a courtesy, so a
   // failure there is logged but never loses the enquiry.
@@ -192,10 +214,16 @@ export async function POST(request: Request) {
       "Contact form: the enquiry could not be sent.",
       officeResult.reason,
     );
+    // It is in the admin panel, so nothing is lost.
+    if (storedId !== null) return Response.json({ ok: true });
     return Response.json(
       { error: "Your message could not be sent. Please try again." },
       { status: 502 },
     );
+  }
+
+  if (storedId !== null) {
+    await markEnquiryEmailed(storedId).catch(() => undefined);
   }
 
   if (visitorResult.status === "rejected") {

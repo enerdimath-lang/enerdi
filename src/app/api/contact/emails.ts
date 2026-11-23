@@ -12,6 +12,7 @@ export type Enquiry = {
   name: string;
   email: string;
   company: string;
+  phone: string;
   message: string;
   receivedAt: Date;
 };
@@ -242,6 +243,7 @@ ${sectionLabel(copy.detailsLabel)}
     `<a href="mailto:${escapeHtml(enquiry.email)}" style="color:${colour.navy800};text-decoration:underline;">${escapeHtml(enquiry.email)}</a>`,
   )}
   ${detailRow("Company", escapeHtml(company))}
+  ${detailRow("Phone", escapeHtml(enquiry.phone || "Not given"))}
   ${detailRow("Received", escapeHtml(when), true)}
 </table>
 
@@ -262,6 +264,7 @@ ${button(mailto, fill(copy.action, greeting))}`;
     `Name:     ${enquiry.name}`,
     `Email:    ${enquiry.email}`,
     `Company:  ${company}`,
+    `Phone:    ${enquiry.phone || "Not given"}`,
     `Received: ${when}`,
     "",
     `${copy.messageLabel}:`,

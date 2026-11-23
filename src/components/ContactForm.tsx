@@ -6,12 +6,13 @@ type Fields = {
   name: string;
   email: string;
   company: string;
+  phone: string;
   message: string;
 };
 
 type Errors = Partial<Record<keyof Fields, string>>;
 
-const emptyFields: Fields = { name: "", email: "", company: "", message: "" };
+const emptyFields: Fields = { name: "", email: "", company: "", phone: "", message: "" };
 
 function validate(fields: Fields): Errors {
   const errors: Errors = {};
@@ -159,19 +160,35 @@ export function ContactForm() {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="company" className="font-semibold text-navy-800">
-          Company <span className="font-normal text-muted">(optional)</span>
-        </label>
-        <input
-          id="company"
-          name="company"
-          type="text"
-          autoComplete="organization"
-          value={fields.company}
-          onChange={(event) => update("company", event.target.value)}
-          className={inputClass}
-        />
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div>
+          <label htmlFor="company" className="font-semibold text-navy-800">
+            Company <span className="font-normal text-muted">(optional)</span>
+          </label>
+          <input
+            id="company"
+            name="company"
+            type="text"
+            autoComplete="organization"
+            value={fields.company}
+            onChange={(event) => update("company", event.target.value)}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="phone" className="font-semibold text-navy-800">
+            Phone <span className="font-normal text-muted">(optional)</span>
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            value={fields.phone}
+            onChange={(event) => update("phone", event.target.value)}
+            className={inputClass}
+          />
+        </div>
       </div>
 
       <div>
